@@ -1,0 +1,5 @@
+# Match Auto-RGB's current 4 MB layout, retaining NVS and the factory app offset.
+# Name,      Type, SubType, Offset,   Size,     Flags
+nvs,         data, nvs,     0x9000,   0x6000,
+phy_init,    data, phy,     0xF000,   0x1000,
+factory,     app,  factory, 0x10000,  0x200000,

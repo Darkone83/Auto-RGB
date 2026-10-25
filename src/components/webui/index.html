@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#09080d">
+<title>Auto-RGB</title>
+<style>
+:root{
+  --bg:#09080d;--panel:#121018;--panel2:#18141f;--line:#2b2735;--line2:#45384f;
+  --text:#f5f2f7;--muted:#9d95a7;--purple:#9a4df0;--purple2:#c155ff;--red:#c52f52;
+  --good:#66d99a;--warn:#f0bd67;--danger:#ff7187;--shadow:0 16px 44px rgba(0,0,0,.34);
+  --top:58px;--nav:70px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:radial-gradient(circle at 10% -10%,rgba(138,55,215,.18),transparent 27%),radial-gradient(circle at 100% 0,rgba(196,45,78,.12),transparent 26%),var(--bg)}
+button,input,select{font:inherit}button{-webkit-tap-highlight-color:transparent}button,input,select{outline:none}
+.app{position:fixed;inset:0;max-width:520px;margin:auto;background:linear-gradient(180deg,rgba(255,255,255,.008),transparent 30%)}
+.topbar{position:absolute;left:0;right:0;top:0;height:calc(var(--top) + env(safe-area-inset-top));padding:env(safe-area-inset-top) 14px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(255,255,255,.055);background:rgba(9,8,13,.93);backdrop-filter:blur(18px);z-index:20}
+.titleblock{min-width:0}.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:#bd9be7}.pagetitle{font-size:18px;font-weight:760;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}.dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 12px rgba(102,217,154,.55)}
+.viewport{position:absolute;left:0;right:0;top:calc(var(--top) + env(safe-area-inset-top));bottom:calc(var(--nav) + env(safe-area-inset-bottom));overflow:hidden}
+.page{display:none;height:100%;overflow-y:auto;overscroll-behavior:contain;padding:14px 14px 28px}.page.active{display:block}.page::-webkit-scrollbar{display:none}
+.hero{display:flex;justify-content:center;align-items:center;margin:-4px 0 4px}.hero img{width:min(84vw,310px);height:auto;display:block;filter:drop-shadow(0 10px 26px rgba(130,49,188,.16))}
+.card{border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 54%),var(--panel);box-shadow:var(--shadow);padding:15px;margin-bottom:11px}.card.accent{background:linear-gradient(145deg,rgba(133,55,219,.13),rgba(197,47,82,.055) 65%,transparent),var(--panel)}
+.row{display:flex;align-items:center;gap:10px}.space{justify-content:space-between}.grow{flex:1;min-width:0}.stack{display:grid;gap:9px}
+h2,h3,p{margin:0}h2{font-size:16px}h3{font-size:14px}.muted{font-size:12px;color:var(--muted);line-height:1.4}.tiny{font-size:10px;color:#7f7788}.value{font-variant-numeric:tabular-nums;color:#dfc9ff;font-weight:730}
+.btn{min-height:44px;border:1px solid var(--line);background:#1a1720;color:var(--text);border-radius:12px;padding:10px 13px;font-weight:650}.btn.primary{border:0;background:linear-gradient(135deg,#6f35cc,#9949eb 58%,#b33674)}.btn.danger{background:#291318;border-color:#5c2835;color:#ff9bad}.btn.ghost{background:transparent}.btn.block{width:100%}.btn.small{min-height:38px;padding:8px 10px;font-size:12px}.btn:active{transform:scale(.985)}
+.field{display:grid;gap:6px;margin:11px 0}.field label{font-size:10px;text-transform:uppercase;letter-spacing:.65px;color:#aaa0b4}
+input[type=text],input[type=number],select{width:100%;height:44px;border:1px solid var(--line);border-radius:11px;background:#0c0a10;color:var(--text);padding:0 11px}
+input[data-tap-edit][readonly]{opacity:1;color:var(--text);-webkit-text-fill-color:var(--text);cursor:text}input:focus,select:focus{border-color:#7542ba;box-shadow:0 0 0 3px rgba(154,77,240,.11)}
+input[type=range]{width:100%;accent-color:var(--purple)}input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-radius:10px;background:#0c0a10;padding:2px}
+.switch{position:relative;width:48px;height:28px;flex:0 0 48px}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:99px;background:#2a2630;border:1px solid #3a3442;transition:.18s}.switch span:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#9b93a3;transition:.18s}.switch input:checked+span{background:linear-gradient(90deg,#7138c7,#a947d5);border-color:#9a52e2}.switch input:checked+span:after{left:23px;background:#fff}
+.metric{font-size:28px;font-weight:800;letter-spacing:-1px}.powerstate{font-weight:800;font-size:12px;letter-spacing:.7px}.powerstate.on{color:var(--good)}.powerstate.off{color:var(--danger)}
+.list{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(18,16,24,.84)}.listrow{width:100%;min-height:65px;display:flex;align-items:center;gap:11px;padding:10px 12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);text-align:left}.listrow:last-child{border-bottom:0}.listrow:active{background:#17131d}.index{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#1d1627;border:1px solid #3b2b4f;color:#d7baff;font-size:11px;font-weight:800}.rowtitle{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rowsub{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge{font-size:10px;padding:4px 7px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}.badge.on{border-color:#2d6849;color:#8de5b2;background:#102219}.badge.off{border-color:#51303a;color:#d596a2;background:#211217}.chev{font-size:21px;color:#6f6876;margin-left:2px}
+.sectionbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 1px 10px}.sectionbar h2{font-size:18px}.sectionmeta{font-size:11px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:6px 9px;border-radius:99px;background:#1b1425;border:1px solid #3b2a4f;color:#d7bcfb;font-size:10px}
+.notice{padding:11px 12px;border:1px solid #3a2c4b;border-radius:12px;background:#15101e;color:#cbb9df;font-size:11px;line-height:1.45}.divider{height:1px;background:var(--line);margin:13px 0}
+.quickscene{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.quickscene .btn{height:44px}
+.bottomnav{position:absolute;left:0;right:0;bottom:0;height:calc(var(--nav) + env(safe-area-inset-bottom));padding:6px 5px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(5,1fr);background:rgba(10,9,14,.96);border-top:1px solid rgba(255,255,255,.07);backdrop-filter:blur(18px);z-index:30}.navbtn{border:0;background:transparent;color:#817988;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:700}.navbtn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}.navbtn.active{color:#d7b8ff;background:linear-gradient(180deg,rgba(150,73,236,.14),rgba(150,73,236,.03))}
+.dirtybar{position:absolute;left:10px;right:10px;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 7px);min-height:48px;border:1px solid #4c3b28;border-radius:14px;background:rgba(30,23,15,.96);backdrop-filter:blur(16px);display:none;align-items:center;gap:8px;padding:7px 8px 7px 12px;z-index:28;box-shadow:0 12px 34px rgba(0,0,0,.32)}.dirtybar.show{display:flex}.dirtybar .grow{font-size:11px;color:#e2c486}.dirtybar .btn{min-height:34px;padding:6px 9px;font-size:11px}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:60;transform:translateX(102%);transition:transform .2s ease;max-width:520px;margin:auto}.sheet.open{transform:translateX(0)}.sheethead{height:calc(58px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line);background:rgba(9,8,13,.96);position:relative;z-index:2}.sheethead .btn{width:40px;min-height:40px;padding:0;font-size:21px}.sheettitles{min-width:0}.sheettitle{font-size:17px;font-weight:760;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sheetsub{font-size:10px;color:var(--muted);margin-top:1px}.sheetbody{position:absolute;left:0;right:0;top:calc(58px + env(safe-area-inset-top));bottom:0;overflow-y:auto;padding:14px 14px calc(24px + env(safe-area-inset-bottom));overscroll-behavior:contain}.sheetbody::-webkit-scrollbar{display:none}
+.segmentrow{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid var(--line)}.segmentrow:last-child{border-bottom:0}.segname{flex:1;min-width:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.iconbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#19151f;color:#fff}.lengthbox{display:none;margin-top:10px;padding:12px;border-radius:13px;background:#0c0a10;border:1px solid #3a2e4c}.lengthbox.open{display:block}.lengthvalue{font-size:30px;font-weight:800;text-align:center;color:#dcc6ff;min-width:56px}.steprow{display:grid;grid-template-columns:1fr 1fr auto 1fr 1fr;gap:6px;align-items:center}.steprow .btn{padding:7px 4px}
+.colorrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.palettegrid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:4px}.paletteitem{display:grid;gap:4px;justify-items:center}.paletteitem input[type=color]{width:100%;min-width:0;height:43px}.paletteitem span{font-size:9px;color:var(--muted)}.paletteactions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.fxhidden{display:none!important}
+.toast{position:fixed;left:14px;right:14px;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 12px);z-index:100;padding:12px 14px;border-radius:13px;background:#1b1721;border:1px solid #40364a;box-shadow:0 16px 40px rgba(0,0,0,.4);display:none;font-size:12px}.toast.show{display:block}
+.empty{padding:25px 16px;text-align:center;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:12px}
+@media(max-width:360px){.page{padding-left:10px;padding-right:10px}.hero img{width:260px}.card{padding:13px}.listrow{padding-left:10px;padding-right:10px}.navbtn{font-size:8px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="titleblock"><div class="eyebrow">Auto-RGB</div><div class="pagetitle" id="pageTitle">Home</div></div>
+    <div class="conn"><span class="dot" id="connDot"></span><span id="statusText">Connecting…</span></div>
+  </header>
+
+  <main class="viewport">
+    <section class="page active" id="homePage">
+      <div class="hero"><img src="/assets/auto-rgb-logo.webp" alt="Auto-RGB"></div>
+      <div class="card accent">
+        <div class="row space"><div><h2>Lighting</h2><div class="muted">Master output</div></div><span class="powerstate" id="powerState">—</span></div>
+        <button class="btn primary block" id="masterPower" style="margin-top:12px">Turn lighting on</button>
+      </div>
+      <div class="card">
+        <div class="row space"><div><h2>Brightness</h2><div class="muted">Whole installation</div></div><span class="metric" id="masterVal">0%</span></div>
+        <input id="master" type="range" min="0" max="255" value="160" style="margin-top:11px">
+      </div>
+      <div class="card">
+        <div class="quickscene"><div class="field" style="margin:0"><label>Current scene</label><select id="sceneSelect"></select></div><button class="btn" id="editSceneHome">Edit</button></div>
+      </div>
+      <div class="chips" id="summary"></div>
+    </section>
+
+    <section class="page" id="channelsPage">
+      <div class="sectionbar"><div><h2>Channels</h2><div class="sectionmeta" id="channelCount">0 of 8 enabled</div></div></div>
+      <div class="list" id="channelList"></div>
+    </section>
+
+    <section class="page" id="zonesPage">
+      <div class="sectionbar"><div><h2>Zones</h2><div class="sectionmeta">Logical groups & order</div></div><button class="btn small" id="addZone">+ Add</button></div>
+      <div class="list" id="zoneList"></div>
+    </section>
+
+    <section class="page" id="scenesPage">
+      <div class="sectionbar"><div><h2>Demo scenes</h2><div class="sectionmeta">Built in • always available</div></div></div>
+      <div class="list" id="demoSceneList"></div>
+      <div class="sectionbar" style="margin-top:18px"><div><h2>My scenes</h2><div class="sectionmeta" id="customSceneCount">0 of 4 used</div></div><button class="btn small" id="addScene">+ Add</button></div>
+      <div class="list" id="sceneList"></div>
+    </section>
+
+    <section class="page" id="systemPage">
+      <div class="card">
+        <h2>Device</h2>
+        <div class="field"><label>Name</label><input id="deviceName" type="text" data-tap-edit readonly enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
+        <div class="field"><label>Wi-Fi name</label><input id="ssid" type="text" data-tap-edit readonly enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
+        <div class="notice">Open local-only SoftAP. The captive portal launches when a phone joins. Auto-RGB never connects to the internet.</div>
+      </div>
+      <div class="card">
+        <h2>Startup behavior</h2>
+        <div class="field"><label>Power state</label><select id="startupPower"><option value="0">Restore last state</option><option value="1">Always on</option><option value="2">Always off</option></select></div>
+        <div class="field"><label>Startup scene</label><select id="startupScene"></select></div>
+        <div class="row space" style="margin-top:12px"><div><h3>Soft power-on</h3><div class="muted">Fade from dark instead of snapping on</div></div><span class="value" id="powerFadeVal">1.5 s</span></div>
+        <input id="powerFade" type="range" min="0" max="10000" step="100" value="1500" style="margin-top:12px">
+      </div>
+      <div class="card">
+        <div class="row space"><div><h2>Remote Control</h2><div class="muted">0.96" SSD1306 + rotary encoder</div></div><label class="switch"><input id="remoteControl" type="checkbox"><span></span></label></div>
+        <div id="remoteOptions">
+          <div class="row space" style="margin-top:14px"><span class="muted">OLED brightness</span><span class="value" id="remoteContrastVal">127</span></div>
+          <input id="remoteContrast" type="range" min="0" max="255" step="1" value="127" style="margin-top:8px">
+          <div class="row space" style="margin-top:14px"><div><h3>Auto dim</h3><div class="muted">Uses the ALS when available and falls back to the selected brightness.</div></div><label class="switch"><input id="remoteAutoDim" type="checkbox"><span></span></label></div>
+          <div class="field"><label>Sleep timeout</label><select id="remoteTimeout"><option value="0">Never</option><option value="15">15 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">1 minute</option><option value="90">90 seconds</option><option value="120">2 minutes</option><option value="300">5 minutes</option></select></div>
+          <div class="row space"><div><h3>Invert OLED</h3><div class="muted">Useful for alternate display modules.</div></div><label class="switch"><input id="remoteInvert" type="checkbox"><span></span></label></div>
+          <div class="field" id="remoteScreensaverWrap" style="display:none"><label>RTC screensaver</label><select id="remoteScreensaver"><option value="0">Off</option><option value="1">After 1 minute</option><option value="2">After 2 minutes</option><option value="3">After 3 minutes</option><option value="4">After 4 minutes</option><option value="5">After 5 minutes</option></select><div class="tiny">Alternates live date/time with the Auto-RGB logo. Requires a healthy, time-valid RTC.</div></div>
+        </div>
+        <div class="row space" style="margin-top:12px"><span class="muted">OLED status</span><span class="badge" id="remoteStatus">Disabled</span></div>
+        <div class="notice" style="margin-top:12px">The remote mirrors live controller state and can handle scenes, zones, quick colors, startup behavior and master controls.</div>
+      </div>
+      <div class="card">
+        <h2>I²C Accessories</h2>
+        <div class="row space" style="margin-top:12px"><div><h3>Ambient Light Sensor</h3><div class="muted">VEML7700 · 0x10</div></div><label class="switch"><input id="alsEnabled" type="checkbox"><span></span></label></div>
+        <div id="alsOptions">
+          <div class="field"><label>Sensor sensitivity</label><select id="alsSensitivity"><option value="0">Low · bright/direct mounting</option><option value="1">Normal · recommended</option><option value="2">High · shaded cabin</option><option value="3">Very high · dark/tinted mounting</option></select></div>
+          <div class="tiny">Higher sensitivity improves low-light resolution but reduces the maximum measurable lux before saturation.</div>
+        </div>
+        <div class="row space" style="margin-top:10px"><span class="muted">Sensor status</span><span class="badge" id="alsStatus">Disabled</span></div>
+        <div class="row space" style="margin-top:16px"><div><h3>Real-Time Clock</h3><div class="muted">DS3231M · 0x68</div></div><label class="switch"><input id="rtcEnabled" type="checkbox"><span></span></label></div>
+        <div id="rtcOptions">
+          <div class="field"><label>Date</label><input id="rtcDate" type="date" min="2000-01-01" max="2199-12-31"></div>
+          <div class="field"><label>Time</label><input id="rtcTime" type="time" step="1"></div>
+          <div class="row" style="gap:8px"><button class="btn grow" id="rtcSetPhone">Use phone time</button><button class="btn primary grow" id="rtcSet">Set RTC</button></div>
+          <div class="tiny" style="margin-top:8px">RTC stores local calendar time. Enable and apply the RTC first, then set the clock.</div>
+        </div>
+        <div class="row space" style="margin-top:10px"><span class="muted">RTC status</span><span class="badge" id="rtcStatus">Disabled</span></div>
+        <div class="notice" style="margin-top:12px">Disabled accessories are not probed. Enabled hardware is monitored automatically; a missing accessory triggers the amber status-LED fault state.</div>
+      </div>
+      <button class="btn primary block" id="applySystem">Apply system settings</button>
+      <div class="card" style="margin-top:11px">
+        <div class="row space"><span class="muted">Firmware</span><span id="version">—</span></div>
+        <div class="row space" style="margin-top:9px"><span class="muted">Config schema</span><span id="schema">—</span></div>
+        <div class="divider"></div>
+        <button class="btn danger block" id="factory">Factory reset configuration</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="dirtybar" id="dirtyBar"><div class="grow">Unsaved changes</div><button class="btn ghost" id="revert">Discard</button><button class="btn primary" id="save">Save</button></div>
+
+  <nav class="bottomnav" aria-label="Primary">
+    <button class="navbtn active" data-page="home"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+    <button class="navbtn" data-page="channels"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="18" r="2"/></svg><span>Channels</span></button>
+    <button class="navbtn" data-page="zones"><svg viewBox="0 0 24 24"><path d="M4 5h7v6H4zM13 5h7v6h-7zM4 13h7v6H4zM13 13h7v6h-7z"/></svg><span>Zones</span></button>
+    <button class="navbtn" data-page="scenes"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Scenes</span></button>
+    <button class="navbtn" data-page="system"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A8 8 0 0 0 15 6l-.3-2.6h-4L10.4 6A8 8 0 0 0 8.5 7L6.1 6 4 9.5 6.1 11a8 8 0 0 0 0 2L4 14.5 6.1 18l2.4-1A8 8 0 0 0 10 18l.7 2.6h4L15 18a8 8 0 0 0 1.5-1l2.4 1 2-3.5-2-1.5c.1-.3.1-.7.1-1z"/></svg><span>System</span></button>
+  </nav>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="sheethead"><button class="btn ghost" id="sheetBack">‹</button><div class="sheettitles"><div class="sheettitle" id="sheetTitle"></div><div class="sheetsub" id="sheetSub"></div></div></div>
+  <div class="sheetbody" id="sheetBody"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let cfg=null,effects=[],accessoryState=null,lengthPreview={id:-1,count:0},sheetStack=[],livePollBusy=false,pendingLiveReload=false;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const pageTitles={home:'Home',channels:'Channels',zones:'Zones',scenes:'Scenes',system:'System'};
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove('show'),2200)}
+async function api(path,body){const o={method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'}};if(body!==undefined)o.body=JSON.stringify(body);const r=await fetch(path,o);let j={};try{j=await r.json()}catch(_){throw new Error('Invalid response')}if(!r.ok||j.ok===false)throw new Error(j.error||r.statusText);return j}
+function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function pct(v){return Math.round((+v||0)*100/255)+'%'}
+function fadeText(ms){ms=+ms||0;return ms===0?'Off':((ms/1000).toFixed(ms%1000?1:0)+' s')}
+function effectMeta(id){return effects.find(e=>e.id===id)||effects[0]||{}}
+function markDirty(){cfg.dirty=true;$('#dirtyBar').classList.add('show');$('#statusText').textContent='Unsaved'}
+function clearDirty(){cfg.dirty=false;$('#dirtyBar').classList.remove('show');$('#statusText').textContent='Connected'}
+async function load(){const [c,e,s,a]=await Promise.all([api('/api/config'),api('/api/effects'),api('/api/status'),api('/api/accessories')]);cfg=c;effects=e.effects;accessoryState=a;$('#version').textContent=s.version;$('#schema').textContent=c.schemaVersion;renderAll();cfg.dirty?markDirty():clearDirty()}
+function isEditableFocus(){const e=document.activeElement;return !!e&&(e.matches('input[type=text],input[type=number],input[type=date],input[type=time],textarea')||e.isContentEditable)}
+function dismissKeyboard(){const e=document.activeElement;if(!e)return;if(e.matches?.('input[data-tap-edit]')){e.blur();e.readOnly=true;return}if(typeof e.blur==='function'&&isEditableFocus())e.blur()}
+function setValueUnlessFocused(el,value){if(!el||document.activeElement===el)return;el.value=value??''}
+function renderAll(){renderHome();renderChannels();renderZones();renderScenes();renderSystem()}
+function renderHome(){const on=!!cfg.system.masterPower;$('#powerState').textContent=on?'ON':'OFF';$('#powerState').className='powerstate '+(on?'on':'off');$('#masterPower').textContent=on?'Turn lighting off':'Turn lighting on';$('#masterPower').className='btn block '+(on?'danger':'primary');$('#master').value=cfg.system.masterBrightness;$('#masterVal').textContent=pct(cfg.system.masterBrightness);const demos=cfg.scenes.filter(s=>s.builtIn),custom=cfg.scenes.filter(s=>!s.builtIn);$('#sceneSelect').innerHTML=`<optgroup label="Demo scenes">${demos.map(s=>`<option value="${s.id}" ${s.id===cfg.system.activeScene?'selected':''}>${esc(s.name)}</option>`).join('')}</optgroup>${custom.length?`<optgroup label="My scenes">${custom.map(s=>`<option value="${s.id}" ${s.id===cfg.system.activeScene?'selected':''}>${esc(s.name)}</option>`).join('')}</optgroup>`:''}`;const en=cfg.channels.filter(c=>c.enabled).length,leds=cfg.channels.reduce((n,c)=>n+(c.enabled?c.ledCount:0),0),used=cfg.sceneSlots?.customUsed??custom.length,max=cfg.sceneSlots?.customMax??4;$('#summary').innerHTML=`<span class="chip">${en}/8 outputs</span><span class="chip">${leds} LEDs</span><span class="chip">${cfg.zones.length} zones</span><span class="chip">${used}/${max} custom scenes</span>`}
+function renderChannels(){const en=cfg.channels.filter(c=>c.enabled).length;$('#channelCount').textContent=`${en} of 8 enabled`;$('#channelList').innerHTML=cfg.channels.map(ch=>`<button class="listrow channel-open" data-id="${ch.id}"><span class="index">CH${ch.id+1}</span><span class="grow"><div class="rowtitle">${esc(ch.name)}</div><div class="rowsub">${ch.ledCount} LEDs • ${ch.order}${ch.reversed?' • reversed':''}</div></span><span class="badge ${ch.enabled?'on':'off'}">${ch.enabled?'ON':'OFF'}</span><span class="chev">›</span></button>`).join('')}
+function renderZones(){if(!cfg.zones.length){$('#zoneList').innerHTML='<div class="empty">No zones configured.</div>';return}$('#zoneList').innerHTML=cfg.zones.map(z=>`<button class="listrow zone-open" data-id="${z.id}"><span class="index">Z${z.id+1}</span><span class="grow"><div class="rowtitle">${esc(z.name)}</div><div class="rowsub">${z.segments.length} channel${z.segments.length===1?'':'s'} in order</div></span><span class="badge ${z.enabled?'on':'off'}">${z.enabled?'ON':'OFF'}</span><span class="chev">›</span></button>`).join('')}
+function sceneRow(s,label){const active=s.id===cfg.system.activeScene;return `<button class="listrow scene-open" data-id="${s.id}"><span class="index">${label}</span><span class="grow"><div class="rowtitle">${esc(s.name)}</div><div class="rowsub">${active?'Active scene':s.builtIn?'Built-in demo':'Tap to edit'}</div></span>${active?'<span class="badge on">ACTIVE</span>':s.builtIn?'<span class="badge">DEMO</span>':''}<span class="chev">›</span></button>`}
+function renderScenes(){const demos=cfg.scenes.filter(s=>s.builtIn),custom=cfg.scenes.filter(s=>!s.builtIn),max=cfg.sceneSlots?.customMax??4;$('#demoSceneList').innerHTML=demos.map((s,i)=>sceneRow(s,`D${i+1}`)).join('')||'<div class="empty">No demos available.</div>';$('#sceneList').innerHTML=custom.map((s,i)=>sceneRow(s,`C${i+1}`)).join('')||'<div class="empty">No custom scenes yet. Add one or copy a demo.</div>';$('#customSceneCount').textContent=`${custom.length} of ${max} used`;$('#addScene').disabled=custom.length>=max}
+function accessoryBadge(el,enabled,present,text){el.textContent=!enabled?'Disabled':present?(text||'Connected'):'Not detected';el.className='badge '+(!enabled?'':present?'on':'off')}
+function renderAccessoryStatus(){if(!cfg)return;const a=accessoryState||{};accessoryBadge($('#remoteStatus'),!!cfg.system.remoteControlEnabled,!!a.remote?.present,a.remote?.present?`Connected · 0x${Number(a.remote.address||0).toString(16).toUpperCase().padStart(2,'0')}`:'');accessoryBadge($('#rtcStatus'),!!cfg.system.rtcEnabled,!!a.rtc?.present,a.rtc?.present?(a.rtc.timeValid?`Connected · ${(a.rtc.time||'').split(' ')[1]?.slice(0,5)||'time ready'}`:'Connected · clock unset'):'');accessoryBadge($('#alsStatus'),!!cfg.system.ambientLightEnabled,!!a.als?.present,a.als?.present?`Connected · ${Number(a.als.lux||0).toFixed(1)} lux`:'');const rtcReady=!!cfg.system.rtcEnabled&&!!a.rtc?.present&&!!a.rtc?.timeValid;$('#remoteScreensaverWrap').style.display=rtcReady?'block':'none';const rtcConnected=!!a.rtc?.present;$('#rtcSet').disabled=!rtcConnected;$('#rtcSetPhone').disabled=!rtcConnected;if(rtcConnected&&a.rtc?.timeValid&&a.rtc.time&&!$('#rtcDate').matches(':focus')&&!$('#rtcTime').matches(':focus')){const [d,t]=String(a.rtc.time).split(' ');if(d)setValueUnlessFocused($('#rtcDate'),d);if(t)setValueUnlessFocused($('#rtcTime'),t.slice(0,8))}}
+function renderSystem(){setValueUnlessFocused($('#deviceName'),cfg.system.deviceName);setValueUnlessFocused($('#ssid'),cfg.system.ssid);$('#powerFade').value=cfg.system.powerOnFadeMs;$('#powerFadeVal').textContent=fadeText(cfg.system.powerOnFadeMs);$('#startupPower').value=String(cfg.system.startupPowerMode??0);const last=cfg.system.startupScene??-1;$('#startupScene').innerHTML=`<option value="-1" ${last<0?'selected':''}>Last active scene</option>`+cfg.scenes.map(sc=>`<option value="${sc.id}" ${sc.id===last?'selected':''}>${sc.builtIn?'Demo: ':'Custom: '}${esc(sc.name)}</option>`).join('');$('#remoteControl').checked=!!cfg.system.remoteControlEnabled;$('#remoteContrast').value=cfg.system.remoteDisplayContrast??127;$('#remoteContrastVal').textContent=cfg.system.remoteDisplayContrast??127;$('#remoteTimeout').value=String(cfg.system.remoteDisplayTimeout??45);$('#remoteInvert').checked=!!cfg.system.remoteDisplayInvert;$('#remoteAutoDim').checked=!!cfg.system.remoteDisplayAutoDim;$('#remoteScreensaver').value=String(cfg.system.remoteScreensaverMinutes??0);$('#remoteOptions').style.opacity=$('#remoteControl').checked?'1':'.45';$('#rtcEnabled').checked=!!cfg.system.rtcEnabled;$('#alsEnabled').checked=!!cfg.system.ambientLightEnabled;$('#alsSensitivity').value=String(cfg.system.ambientLightSensitivity??1);$('#alsOptions').style.display=$('#alsEnabled').checked?'block':'none';$('#rtcOptions').style.display=$('#rtcEnabled').checked?'block':'none';renderAccessoryStatus()}
+function nav(page){if(page!=='system'&&pendingLiveReload)setTimeout(()=>reloadConfigOnly(),0);$$('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$$('.page').forEach(p=>p.classList.remove('active'));$('#'+page+'Page').classList.add('active');$('#pageTitle').textContent=pageTitles[page];$('#'+page+'Page').scrollTop=0;if(page!=='channels')stopPreview()}
+function openSheet(title,sub,html,state){releaseActiveEditor();sheetStack.push(state||null);$('#sheetTitle').textContent=title;$('#sheetSub').textContent=sub||'';$('#sheetBody').innerHTML=html;$$('#sheetBody input[data-tap-edit]').forEach(armTapEdit);$('#sheet').classList.add('open');$('#sheetBody').scrollTop=0}
+async function closeSheet(){await stopPreview();sheetStack=[];$('#sheet').classList.remove('open');if(pendingLiveReload)await reloadConfigOnly()}
+function sheetBack(){if(sheetStack.length>1){sheetStack.pop();const prev=sheetStack.pop();prev?.()}else closeSheet()}
+function channelEditorHtml(ch){return `<div class="card accent"><div class="row space"><div><h2>Channel enabled</h2><div class="muted">Off channels never render.</div></div><label class="switch"><input id="ceEnable" type="checkbox" ${ch.enabled?'checked':''}><span></span></label></div></div><div class="card"><div class="field"><label>Label</label><input id="ceName" data-tap-edit readonly value="${esc(ch.name)}"></div><div class="field"><label>LED count</label><input id="ceCount" type="number" min="0" max="300" value="${ch.ledCount}"></div><div class="row"><button class="btn small grow" id="ceIdentify">Identify</button><button class="btn small grow" id="ceFind">Find length</button></div><div class="lengthbox" id="lengthBox"><div class="muted">Increase until the green endpoint reaches the last LED.</div><div class="steprow" style="margin-top:10px"><button class="btn small lenStep" data-step="-10">−10</button><button class="btn small lenStep" data-step="-1">−1</button><span class="lengthvalue" id="lengthValue">${Math.max(1,ch.ledCount)}</span><button class="btn small lenStep" data-step="1">+1</button><button class="btn small lenStep" data-step="10">+10</button></div><div class="row" style="margin-top:9px"><button class="btn primary small grow" id="ceUseLength">Use count</button><button class="btn small grow" id="ceCancelLength">Cancel</button></div></div><div class="field"><label>Color order</label><select id="ceOrder">${['GRB','RGB','BRG','RBG','GBR','BGR'].map(o=>`<option ${o===ch.order?'selected':''}>${o}</option>`).join('')}</select></div><div class="row space"><div><h3>Reverse strip</h3><div class="muted">Flip logical pixel direction.</div></div><label class="switch"><input id="ceReverse" type="checkbox" ${ch.reversed?'checked':''}><span></span></label></div><div class="divider"></div><div class="row space"><span class="muted">Channel trim</span><span class="value" id="ceBrightVal">${pct(ch.brightness)}</span></div><input id="ceBright" type="range" min="0" max="255" value="${ch.brightness}"></div><button class="btn primary block" id="ceApply">Apply channel</button>`}
+function openChannel(id){const ch=cfg.channels[id];const rerender=()=>openChannel(id);openSheet(`CH${id+1}`,ch.name,channelEditorHtml(ch),rerender);$('#ceBright').oninput=e=>$('#ceBrightVal').textContent=pct(e.target.value);$('#ceIdentify').onclick=async()=>{await stopPreview();await api('/api/identify',{id});toast('Identifying '+ch.name)};$('#ceFind').onclick=async()=>{await stopPreview();const count=Math.max(1,Math.min(300,+$('#ceCount').value||1));lengthPreview={id,count};$('#lengthValue').textContent=count;$('#lengthBox').classList.add('open');await api('/api/length-preview',{id,count})};$$('.lenStep').forEach(b=>b.onclick=async()=>{const count=Math.max(1,Math.min(300,lengthPreview.count+(+b.dataset.step)));lengthPreview={id,count};$('#lengthValue').textContent=count;await api('/api/length-preview',{id,count})});$('#ceUseLength').onclick=async()=>{$('#ceCount').value=lengthPreview.count;await stopPreview();$('#lengthBox').classList.remove('open')};$('#ceCancelLength').onclick=async()=>{await stopPreview();$('#lengthBox').classList.remove('open')};$('#ceApply').onclick=async()=>{await stopPreview();const body={id,name:$('#ceName').value,ledCount:+$('#ceCount').value,brightness:+$('#ceBright').value,order:$('#ceOrder').value,enabled:$('#ceEnable').checked,reversed:$('#ceReverse').checked};await api('/api/channel',body);Object.assign(cfg.channels[id],body);markDirty();renderHome();renderChannels();$('#sheetSub').textContent=body.name;toast('Channel updated')}}
+function segmentRows(z){return z.segments.map((s,i)=>{const ch=cfg.channels[s.channel];return `<div class="segmentrow"><span class="index">CH${s.channel+1}</span><span class="segname">${esc(ch?.name||('Channel '+(s.channel+1)))}</span><button class="iconbtn segMove" data-i="${i}" data-dir="-1">↑</button><button class="iconbtn segMove" data-i="${i}" data-dir="1">↓</button><button class="iconbtn segRemove" data-i="${i}">×</button></div>`}).join('')||'<div class="empty">No channels in this zone.</div>'}
+function zoneEditorHtml(z){const used=new Set(z.segments.map(s=>s.channel));const opts=cfg.channels.map(c=>used.has(c.id)?'':`<option value="${c.id}">CH${c.id+1} — ${esc(c.name)}${c.enabled?'':' (off)'}</option>`).join('');return `<div class="card"><div class="row space"><div><h2>Zone enabled</h2><div class="muted">Scenes can also mute a zone.</div></div><label class="switch"><input id="zeEnable" type="checkbox" ${z.enabled?'checked':''}><span></span></label></div><div class="field"><label>Name</label><input id="zeName" data-tap-edit readonly value="${esc(z.name)}"></div></div><div class="card"><div class="row space"><h2>Channel order</h2><span class="badge">${z.segments.length}/8</span></div><div id="segmentList">${segmentRows(z)}</div>${z.segments.length<8?`<div class="field"><label>Add channel</label><select id="zeAdd"><option value="">Choose…</option>${opts}</select></div>`:''}</div><button class="btn primary block" id="zeApply">Apply zone</button>`}
+function openZone(id){const z=cfg.zones[id],rerender=()=>openZone(id);openSheet(`Zone ${id+1}`,z.name,zoneEditorHtml(z),rerender);$$('.segMove').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,j=i+(+b.dataset.dir);if(j>=0&&j<z.segments.length){[z.segments[i],z.segments[j]]=[z.segments[j],z.segments[i]];sheetStack.pop();openZone(id)}});$$('.segRemove').forEach(b=>b.onclick=()=>{z.segments.splice(+b.dataset.i,1);sheetStack.pop();openZone(id)});$('#zeAdd')?.addEventListener('change',e=>{if(e.target.value==='')return;if(z.segments.length<8)z.segments.push({channel:+e.target.value,start:0,length:0,reversed:false});sheetStack.pop();openZone(id)});$('#zeApply').onclick=async()=>{z.name=$('#zeName').value;z.enabled=$('#zeEnable').checked;await api('/api/zone',z);markDirty();renderZones();renderHome();renderScenes();$('#sheetSub').textContent=z.name;toast('Zone updated')}}
+function sceneEditorHtml(sc){const globalRow=sc.global?`<button class="listrow ${sc.builtIn?'':'effect-open'}" ${sc.builtIn?'disabled':''} data-zone="-1"><span class="index">ALL</span><span class="grow"><div class="rowtitle">All Lighting</div><div class="rowsub">Global effect · all enabled outputs · no zone slot</div></span><span class="badge ${sc.global.enabled?'on':'off'}">${sc.global.enabled?'ON':'OFF'}</span>${sc.builtIn?'':'<span class="chev">›</span>'}</button>`:'';const zoneRows=globalRow+cfg.zones.map(z=>{const st=sc.zones[z.id],fx=st?.effect||{};return `<button class="listrow ${sc.builtIn?'':'effect-open'}" ${sc.builtIn?'disabled':''} data-zone="${z.id}"><span class="index">Z${z.id+1}</span><span class="grow"><div class="rowtitle">${esc(z.name)}</div><div class="rowsub">${esc(effectMeta(fx.id).name||fx.id||'Solid')} • ${pct(st?.brightness??255)}</div></span><span class="badge ${st?.enabled?'on':'off'}">${st?.enabled?'ON':'OFF'}</span>${sc.builtIn?'':'<span class="chev">›</span>'}</button>`}).join('');if(sc.builtIn){const custom=cfg.scenes.filter(s=>!s.builtIn),max=cfg.sceneSlots?.customMax??4,canCopy=custom.length<max;return `<div class="card accent"><div class="row space"><div><h2>${esc(sc.name)}</h2><div class="muted">Built-in demo scene</div></div><span class="badge">DEMO</span></div><div class="notice" style="margin-top:12px">Demo scenes stay available and do not use one of your four custom slots. Use this scene as-is, or save a copy to customize it.</div><div class="row" style="margin-top:12px">${sc.id!==cfg.system.activeScene?'<button class="btn grow" id="seActivate">Make active</button>':''}<button class="btn primary grow" id="seClone" ${canCopy?'':'disabled'}>${canCopy?'Save as custom':'4 custom slots used'}</button></div></div><div class="card"><div class="row space"><h2>Zones</h2><span class="badge">Preview</span></div><div class="list" style="margin-top:10px">${zoneRows}</div></div>`}return `<div class="card"><div class="field"><label>Scene name</label><input id="seName" data-tap-edit readonly value="${esc(sc.name)}"></div><div class="row" style="margin-top:8px">${sc.id!==cfg.system.activeScene?'<button class="btn grow" id="seActivate">Make active</button>':''}<button class="btn primary grow" id="seNameApply">Apply name</button></div></div><div class="card"><div class="row space"><h2>Zones</h2><span class="badge">${cfg.zones.length}</span></div><div class="list" style="margin-top:10px">${zoneRows}</div></div>`}
+function openScene(id){const sc=cfg.scenes.find(s=>s.id===id);if(!sc)return;const rerender=()=>openScene(id);openSheet(sc.builtIn?'Demo scene':`Custom scene`,sc.name,sceneEditorHtml(sc),rerender);$('#seActivate')?.addEventListener('click',async()=>{await api('/api/select-scene',{id});cfg.system.activeScene=id;markDirty();renderHome();renderScenes();sheetStack.pop();openScene(id);toast('Scene active')});if(sc.builtIn){$('#seClone')?.addEventListener('click',async()=>{const custom=cfg.scenes.filter(s=>!s.builtIn),max=cfg.sceneSlots?.customMax??4;if(custom.length>=max)return toast('All 4 custom scene slots are used');const newId=cfg.scenes.length;await api('/api/scene',{id:newId,cloneFrom:sc.id,name:`${sc.name} Custom`});await reloadConfigOnly();markDirty();renderScenes();sheetStack.pop();openScene(newId);toast('Demo copied to a custom scene')});return}$('#seNameApply').onclick=async()=>{sc.name=$('#seName').value;await api('/api/scene',{id:sc.id,name:sc.name});markDirty();renderHome();renderScenes();$('#sheetSub').textContent=sc.name;toast('Scene name updated')};$$('.effect-open').forEach(b=>b.onclick=()=>openSceneZone(id,+b.dataset.zone))}
+function fxField(cls,label,body,show=true){return `<div class="field ${cls} ${show?'':'fxhidden'}">${label?`<label>${label}</label>`:''}${body}</div>`}
+function effectPalette(fx,m){const defaults=['#6000a0','#000000','#ff0060','#0060ff','#ff6000'];let p=Array.isArray(fx.palette)&&fx.palette.length?fx.palette.slice(0,5):[fx.primary||defaults[0],fx.secondary||defaults[1]];const min=m?.usesPalette?Math.max(1,m.paletteMin||2):Math.min(2,p.length);while(p.length<min)p.push(defaults[p.length]||'#ffffff');const max=m?.usesPalette?(m.paletteMax||5):2;return p.slice(0,max)}
+function paletteEditorHtml(fx,m){if(!m.usesPalette)return'';const p=effectPalette(fx,m),min=m.paletteMin||2,max=m.paletteMax||5;return `<div class="field fx-palette"><label>Palette · ${p.length} colors</label><div id="fxPalette" class="palettegrid">${p.map((c,i)=>`<label class="paletteitem"><input type="color" value="${c}" data-palette="${i}"><span>${i+1}</span></label>`).join('')}</div><div class="paletteactions"><button class="btn small" id="fxPaletteRemove" ${p.length<=min?'disabled':''}>− Color</button><button class="btn small" id="fxPaletteAdd" ${p.length>=max?'disabled':''}>+ Color</button></div><div class="tiny">Order matters for moving and blended palette effects.</div></div>`}
+function fxDynamicHtml(fx,m){return `<div class="colorrow">${fxField('fx-primary','Primary',`<input id="fxPrimary" type="color" value="${fx.primary}">`,m.usesPrimary&&!m.usesPalette)}${fxField('fx-secondary','Secondary',`<input id="fxSecondary" type="color" value="${fx.secondary}">`,m.usesSecondary&&!m.usesPalette)}</div>${paletteEditorHtml(fx,m)}${fxField('fx-speed','Speed (ms)',`<input id="fxSpeed" type="number" min="100" max="10000" value="${fx.speedMs}">`,m.usesSpeed)}${fxField('fx-width','Width / gap',`<input id="fxWidth" type="number" min="1" max="64" value="${fx.width}">`,m.usesWidth)}${fxField('fx-intensity','Intensity',`<input id="fxIntensity" type="range" min="0" max="255" value="${fx.intensity}">`,true)}${fxField('fx-density','Density',`<input id="fxDensity" type="range" min="0" max="255" value="${fx.density}">`,m.usesDensity)}<div class="row space fx-reverse ${m.usesReverse?'':'fxhidden'}"><div><h3>Reverse effect</h3></div><label class="switch"><input id="fxReverse" type="checkbox" ${fx.reverse?'checked':''}><span></span></label></div>`}
+function sceneZoneHtml(sc,zid){const z=zid===-1?{name:'All Lighting'}:cfg.zones[zid],st=zid===-1?sc.global:sc.zones[zid],fx=st.effect,m=effectMeta(fx.id);return `<div class="card accent"><div class="row space"><div><h2>${esc(z.name)}</h2><div class="muted">Zone in this scene</div></div><label class="switch"><input id="fxEnable" type="checkbox" ${st.enabled?'checked':''}><span></span></label></div></div><div class="card"><div class="field"><label>Effect</label><select id="fxEffect">${effects.map(e=>`<option value="${e.id}" ${e.id===fx.id?'selected':''}>${esc(e.name)}</option>`).join('')}</select></div><div class="row space"><span class="muted">Brightness</span><span class="value" id="fxBrightVal">${pct(st.brightness)}</span></div><input id="fxBright" type="range" min="0" max="255" value="${st.brightness}" style="margin:8px 0 4px"><div id="fxDynamic">${fxDynamicHtml(fx,m)}</div></div><button class="btn primary block" id="fxApply">Apply effect</button>`}
+function currentPalette(){return $$('#fxPalette input[type=color]').map(e=>e.value)}
+function openSceneZone(sceneId,zid){const sc=cfg.scenes.find(s=>s.id===sceneId),st=zid===-1?sc.global:sc.zones[zid];const back=()=>openScene(sceneId);let editFx={...st.effect,palette:effectPalette(st.effect,effectMeta(st.effect.id))};openSheet(zid===-1?'All Lighting':cfg.zones[zid].name,sc.name,sceneZoneHtml(sc,zid),back);$('#fxBright').oninput=e=>$('#fxBrightVal').textContent=pct(e.target.value);const renderDynamic=()=>{const m=effectMeta($('#fxEffect').value);editFx={...editFx,id:$('#fxEffect').value,palette:effectPalette(editFx,m)};$('#fxDynamic').innerHTML=fxDynamicHtml(editFx,m);$('#fxPaletteAdd')?.addEventListener('click',()=>{const p=currentPalette();p.push(['#ff0060','#0060ff','#ff6000','#ffffff'][Math.max(0,p.length-2)]||'#ffffff');editFx.palette=p;renderDynamic()});$('#fxPaletteRemove')?.addEventListener('click',()=>{const p=currentPalette();p.pop();editFx.palette=p;renderDynamic()})};$('#fxEffect').onchange=renderDynamic;renderDynamic();$('#fxApply').onclick=async()=>{const m=effectMeta($('#fxEffect').value),palette=m.usesPalette?currentPalette():[];const primary=palette[0]||$('#fxPrimary')?.value||st.effect.primary,secondary=palette[1]||$('#fxSecondary')?.value||st.effect.secondary;const body={id:sceneId,zone:zid,zoneEnabled:$('#fxEnable').checked,brightness:+$('#fxBright').value,effect:{id:$('#fxEffect').value,primary,secondary,palette,paletteCount:palette.length||Math.max(1,st.effect.paletteCount||2),speedMs:+($('#fxSpeed')?.value||st.effect.speedMs),width:+($('#fxWidth')?.value||st.effect.width),intensity:+($('#fxIntensity')?.value||st.effect.intensity),density:+($('#fxDensity')?.value||st.effect.density),reverse:$('#fxReverse')?.checked||false}};await api('/api/scene',body);await reloadConfigOnly();markDirty();toast('Effect updated');sheetStack.pop();openSceneZone(sceneId,zid)}}
+async function reloadConfigOnly(){cfg=await api('/api/config');pendingLiveReload=false;renderAll();cfg.dirty?markDirty():clearDirty()}
+async function stopPreview(){if(lengthPreview.id>=0){try{await api('/api/length-preview',{id:lengthPreview.id,count:0})}catch(_){}lengthPreview={id:-1,count:0}}}
+
+// Hard mobile focus gate: editable text fields are READONLY unless the user
+// explicitly touches that exact field. This prevents iOS/Captive WebView from
+// restoring keyboard focus to the last input on its own.
+function armTapEdit(el){
+  if(!el || !el.matches('input[data-tap-edit]')) return;
+  el.readOnly = true;
+}
+function releaseEditor(el){
+  if(!el || !el.matches('input[data-tap-edit]')) return;
+  el.blur();
+  el.readOnly = true;
+}
+function releaseActiveEditor(){
+  const e=document.activeElement;
+  if(e && e.matches?.('input[data-tap-edit]')) releaseEditor(e);
+  else if(e && typeof e.blur==='function' && isEditableFocus()) e.blur();
+}
+
+// Persistent fields are armed immediately. Dynamic sheet fields are handled by
+// the delegated touch/pointer listener below.
+$$('input[data-tap-edit]').forEach(armTapEdit);
+
+// A real user touch on a specific field temporarily removes readonly. We do
+// not call focus(); the browser's normal handling of that same touch does it.
+document.addEventListener('pointerdown',e=>{
+  const target=e.target.closest?.('input[data-tap-edit]');
+  const active=document.activeElement;
+
+  if(target){
+    if(active && active!==target && active.matches?.('input[data-tap-edit]')) releaseEditor(active);
+    target.readOnly=false;
+    return;
+  }
+
+  // Any tap outside an editable field commits/dismisses the current editor.
+  releaseActiveEditor();
+},true);
+
+// As soon as the field loses focus, lock it again. No background render or
+// browser focus restoration can reopen the keyboard until another real tap.
+document.addEventListener('blur',e=>{
+  if(e.target?.matches?.('input[data-tap-edit]')) e.target.readOnly=true;
+},true);
+
+// Done/Enter always ends editing; it never advances or focuses another field.
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && e.target?.matches?.('input[data-tap-edit]')){
+    e.preventDefault();
+    releaseEditor(e.target);
+  }
+},true);
+
+// Captive WebViews can restore stale focus when reopened from history. On every
+// page show, force all tap-edit fields back to the locked state.
+window.addEventListener('pageshow',()=>{
+  requestAnimationFrame(()=>{
+    releaseActiveEditor();
+    $$('input[data-tap-edit]').forEach(armTapEdit);
+  });
+});
+
+$$('.navbtn').forEach(b=>b.onclick=()=>{dismissKeyboard();nav(b.dataset.page)});
+$('#sheetBack').onclick=sheetBack;
+$('#masterPower').onclick=async()=>{const enabled=!cfg.system.masterPower;await api('/api/master-power',{enabled});cfg.system.masterPower=enabled;markDirty();renderHome();toast(enabled?'Lighting soft-started':'Lighting off')};
+$('#master').oninput=e=>$('#masterVal').textContent=pct(e.target.value);$('#master').onchange=async e=>{await api('/api/master',{value:+e.target.value});cfg.system.masterBrightness=+e.target.value;markDirty()};
+$('#sceneSelect').onchange=async e=>{const id=+e.target.value;await api('/api/select-scene',{id});cfg.system.activeScene=id;markDirty();renderScenes()};
+$('#editSceneHome').onclick=()=>openScene(cfg.system.activeScene);
+$('#channelList').onclick=e=>{const b=e.target.closest('.channel-open');if(b)openChannel(+b.dataset.id)};
+$('#zoneList').onclick=e=>{const b=e.target.closest('.zone-open');if(b)openZone(+b.dataset.id)};
+const sceneListClick=e=>{const b=e.target.closest('.scene-open');if(b)openScene(+b.dataset.id)};$('#sceneList').onclick=sceneListClick;$('#demoSceneList').onclick=sceneListClick;
+$('#addZone').onclick=async()=>{if(cfg.zones.length>=8)return toast('Maximum 8 zones');const id=cfg.zones.length,z={id,name:'Zone '+(id+1),enabled:true,segments:[]};await api('/api/zone',z);await reloadConfigOnly();markDirty();renderZones();openZone(id)};
+$('#addScene').onclick=async()=>{const custom=cfg.scenes.filter(s=>!s.builtIn),max=cfg.sceneSlots?.customMax??4;if(custom.length>=max)return toast('Maximum 4 custom scenes');const id=cfg.scenes.length;await api('/api/scene',{id,name:'Custom '+(custom.length+1),enabled:true});await reloadConfigOnly();markDirty();renderScenes();openScene(id)};
+$('#powerFade').oninput=e=>$('#powerFadeVal').textContent=fadeText(e.target.value);$('#remoteContrast').oninput=e=>$('#remoteContrastVal').textContent=e.target.value;$('#remoteControl').onchange=e=>{$('#remoteOptions').style.opacity=e.target.checked?'1':'.45';cfg.system.remoteControlEnabled=e.target.checked;renderAccessoryStatus()};$('#rtcEnabled').onchange=e=>{cfg.system.rtcEnabled=e.target.checked;$('#rtcOptions').style.display=e.target.checked?'block':'none';renderAccessoryStatus()};$('#alsEnabled').onchange=e=>{cfg.system.ambientLightEnabled=e.target.checked;$('#alsOptions').style.display=e.target.checked?'block':'none';renderAccessoryStatus()};
+$('#applySystem').onclick=async()=>{dismissKeyboard();const body={deviceName:$('#deviceName').value,ssid:$('#ssid').value,powerOnFadeMs:+$('#powerFade').value,remoteControlEnabled:$('#remoteControl').checked,startupPowerMode:+$('#startupPower').value,startupScene:+$('#startupScene').value,remoteDisplayContrast:+$('#remoteContrast').value,remoteDisplayTimeout:+$('#remoteTimeout').value,remoteDisplayInvert:$('#remoteInvert').checked,remoteDisplayAutoDim:$('#remoteAutoDim').checked,remoteScreensaverMinutes:+$('#remoteScreensaver').value,rtcEnabled:$('#rtcEnabled').checked,ambientLightEnabled:$('#alsEnabled').checked,ambientLightSensitivity:+$('#alsSensitivity').value},r=await api('/api/system',body);Object.assign(cfg.system,body);markDirty();toast(r.rebootRequired?'Wi-Fi name applies after reboot':'System settings staged')};
+function rtcFieldsFromDate(d){const pad=n=>String(n).padStart(2,'0');return {date:`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,time:`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}}
+async function setRtcFromFields(){const d=$('#rtcDate').value,t=$('#rtcTime').value;if(!d||!t)return toast('Choose a date and time');const [year,month,day]=d.split('-').map(Number),tp=t.split(':').map(Number);await api('/api/rtc/set',{year,month,day,hour:tp[0]||0,minute:tp[1]||0,second:tp[2]||0});toast('RTC updated');setTimeout(pollAccessories,250)}
+$('#rtcSetPhone').onclick=async()=>{const v=rtcFieldsFromDate(new Date());$('#rtcDate').value=v.date;$('#rtcTime').value=v.time;try{await setRtcFromFields()}catch(e){toast(e.message)}};
+$('#rtcSet').onclick=async()=>{try{await setRtcFromFields()}catch(e){toast(e.message)}};
+$('#save').onclick=async()=>{dismissKeyboard();await stopPreview();await api('/api/save',{});clearDirty();toast('Saved to NVS')};
+$('#revert').onclick=async()=>{dismissKeyboard();await stopPreview();await api('/api/revert',{});await load();toast('Changes discarded')};
+$('#factory').onclick=async()=>{dismissKeyboard();if(!confirm('Reset all channels, zones, custom scenes and device settings? All channel outputs will be disabled. Built-in demo scenes remain available; custom scenes will be cleared.'))return;await stopPreview();const r=await api('/api/factory-reset',{});await load();nav('home');toast(r.rebootRecommended?'Factory defaults restored. Reboot to apply the default Wi-Fi name.':'Factory defaults restored; channels are off')};
+async function pollLive(){if(livePollBusy||!cfg||document.hidden)return;livePollBusy=true;try{const live=await api('/api/control');if(live.revision!==cfg.revision){if(isEditableFocus()){pendingLiveReload=true;return}if($('#sheet').classList.contains('open')||$('#systemPage').classList.contains('active')){cfg.system.masterPower=live.masterPower;cfg.system.masterBrightness=live.masterBrightness;cfg.system.activeScene=live.activeScene;cfg.system.remoteControlEnabled=live.remoteControlEnabled;cfg.dirty=live.dirty;cfg.revision=live.revision;renderHome();renderScenes();live.dirty?markDirty():clearDirty();pendingLiveReload=true}else{await reloadConfigOnly()}}}catch(_){ }finally{livePollBusy=false}}
+async function pollAccessories(){if(!cfg||document.hidden||!$('#systemPage').classList.contains('active'))return;try{accessoryState=await api('/api/accessories');renderAccessoryStatus()}catch(_){}}
+setInterval(pollAccessories,1500);
+setInterval(pollLive,750);
+window.addEventListener('popstate',()=>{if($('#sheet').classList.contains('open'))closeSheet()});
+load().catch(e=>{$('#statusText').textContent='Offline';$('#connDot').style.background='var(--danger)';toast(e.message)});
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Self-contained RTC: no managed DS3231 dependency required.
+# Preserve other project dependencies here if you already have them.
+dependencies:
+  idf: ">=5.5"
