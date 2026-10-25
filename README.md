@@ -60,6 +60,7 @@ The expansion modules are optional; the main controller works without them.
 - **OLED remote display:** [ELEGOO 0.96-inch SSD1306 OLED module (3-pack)](https://www.amazon.com/dp/B0FSRQG23K) — the display used with the printable remote enclosure. Check the module's actual board dimensions against the enclosure model before printing.
 - **RTC backup battery holder:** [Coin-cell holder](https://www.aliexpress.us/item/2255801053879832.html) — check the footprint, contacts, and polarity against the RTC PCB before assembly.
 - **Ambient-light sensor and expansion hub:** See the hardware files for the corresponding board designs and connections.
+- **USB A to A cables:** [USB A to A cables](https://www.amazon.com/dp/B0GFCRS3F6?ref=ppx_yo2ov_dt_b_fed_asin_title) - order the appropriate lengths for your installation.
 
 Printable enclosure STLs and editable models can be included with the respective hardware files.
 
