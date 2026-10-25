@@ -1,5 +1,11 @@
 # Auto-RGB
 
+<div align=center>
+
+<img src="https://github.com/Darkone83/Auto-RGB/blob/main/img/Logo.png" width=400><img src="https://github.com/Darkone83/Auto-RGB/blob/main/img/Darkone83.png" width=400>
+
+</div>
+
 **Auto-RGB** is an open-source, eight-channel addressable RGB LED controller for automotive and other custom lighting projects. It uses an ESP32-S3 and provides local configuration without requiring a cloud service.
 
 ## Features
